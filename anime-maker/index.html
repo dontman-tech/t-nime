@@ -650,6 +650,74 @@
             transform: scale(1.2);
         }
 
+        /* Duration Controls */
+        .duration-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .duration-presets {
+            display: flex;
+            gap: 0.35rem;
+            flex-wrap: wrap;
+        }
+
+        .preset-btn {
+            padding: 0.35rem 0.6rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-subtle);
+            border-radius: 6px;
+            color: var(--text-secondary);
+            font-size: 0.7rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .preset-btn:hover {
+            background: rgba(255, 107, 157, 0.15);
+            border-color: var(--accent-sakura);
+            color: var(--accent-sakura);
+        }
+
+        .preset-btn.active {
+            background: rgba(255, 107, 157, 0.2);
+            border-color: var(--accent-sakura);
+            color: var(--accent-sakura);
+        }
+
+        .duration-input-row {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .duration-input-row input[type="range"] {
+            flex: 1;
+        }
+
+        .duration-input-row input[type="number"] {
+            width: 70px;
+            padding: 0.5rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-subtle);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 0.85rem;
+            text-align: center;
+        }
+
+        .duration-input-row input[type="number"]:focus {
+            outline: none;
+            border-color: var(--accent-cyan);
+        }
+
+        .duration-input-row input[type="number"]::-webkit-inner-spin-button,
+        .duration-input-row input[type="number"]::-webkit-outer-spin-button {
+            opacity: 1;
+        }
+
         /* Generate Button */
         .generate-btn {
             width: 100%;
@@ -1315,7 +1383,19 @@
                             <span>Duration</span>
                             <span class="setting-value" id="durationValue">5s</span>
                         </div>
-                        <input type="range" id="durationSlider" min="2" max="15" value="5">
+                        <div class="duration-controls">
+                            <div class="duration-presets">
+                                <button class="preset-btn" data-duration="5">5s</button>
+                                <button class="preset-btn" data-duration="15">15s</button>
+                                <button class="preset-btn" data-duration="30">30s</button>
+                                <button class="preset-btn" data-duration="60">1m</button>
+                                <button class="preset-btn" data-duration="180">3m</button>
+                            </div>
+                            <div class="duration-input-row">
+                                <input type="range" id="durationSlider" min="1" max="600" value="5">
+                                <input type="number" id="durationInput" min="1" max="600" value="5" placeholder="Sec">
+                            </div>
+                        </div>
                     </div>
                     <div class="setting-item">
                         <div class="setting-label">
@@ -1570,11 +1650,38 @@
                     card.addEventListener('click', () => this.selectStyle(card.dataset.style));
                 });
 
-                // Sliders
-                document.getElementById('durationSlider').addEventListener('input', (e) => {
-                    this.duration = parseInt(e.target.value);
-                    document.getElementById('durationValue').textContent = this.duration + 's';
+                // Duration controls
+                const updateDuration = (value) => {
+                    this.duration = Math.max(1, Math.min(600, parseInt(value) || 5));
+                    document.getElementById('durationSlider').value = this.duration;
+                    document.getElementById('durationInput').value = this.duration;
+                    document.getElementById('durationValue').textContent = this.formatDuration(this.duration);
+                    
+                    // Update preset button states
+                    document.querySelectorAll('.preset-btn').forEach(btn => {
+                        btn.classList.toggle('active', parseInt(btn.dataset.duration) === this.duration);
+                    });
+                    
                     this.updateInfo();
+                };
+
+                document.getElementById('durationSlider').addEventListener('input', (e) => {
+                    updateDuration(e.target.value);
+                });
+
+                document.getElementById('durationInput').addEventListener('input', (e) => {
+                    updateDuration(e.target.value);
+                });
+
+                document.getElementById('durationInput').addEventListener('blur', (e) => {
+                    updateDuration(e.target.value);
+                });
+
+                // Preset buttons
+                document.querySelectorAll('.preset-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        updateDuration(btn.dataset.duration);
+                    });
                 });
 
                 document.getElementById('intensitySlider').addEventListener('input', (e) => {
@@ -1665,13 +1772,23 @@
 
             async generateAnimation() {
                 const loading = document.getElementById('loadingOverlay');
+                const loadingText = loading.querySelector('.loading-text');
+                const loadingHint = loading.querySelector('.loading-hint');
                 loading.classList.add('show');
 
-                // Simulate generation delay
-                await new Promise(resolve => setTimeout(resolve, 2000));
+                // Scale frame count with duration (6 FPS base for smooth animation)
+                const fps = 12;
+                const frameCount = Math.max(30, this.duration * fps);
+                
+                // Show progress during generation
+                loadingText.textContent = 'Generating animation...';
+                loadingHint.textContent = `${frameCount} frames at ${fps} FPS`;
+
+                // Simulate generation delay (scaled with duration)
+                const delay = Math.min(3000, 500 + this.duration * 5);
+                await new Promise(resolve => setTimeout(resolve, delay));
 
                 this.frames = [];
-                const frameCount = 30;
                 const prompt = document.getElementById('promptInput').value || document.getElementById('imagePrompt').value || 'Abstract anime animation';
 
                 // Generate frames
@@ -1680,6 +1797,7 @@
                 }
 
                 this.frameIndex = 0;
+                this.fps = fps;
                 this.updateInfo();
                 this.hidePlaceholder();
                 this.play();
@@ -1689,7 +1807,8 @@
 
             generateFrame(index, total, prompt) {
                 const progress = index / total;
-                const time = index * 0.1;
+                // Scale time with duration so animation completes in the right time
+                const time = index * (this.duration / total);
 
                 return {
                     progress,
@@ -1703,6 +1822,20 @@
                     glowIntensity: 0.3 + Math.sin(time) * 0.2,
                     colors: this.getStyleColors()
                 };
+            }
+
+            formatDuration(seconds) {
+                if (seconds < 60) {
+                    return seconds + 's';
+                } else if (seconds < 3600) {
+                    const mins = Math.floor(seconds / 60);
+                    const secs = seconds % 60;
+                    return secs > 0 ? mins + 'm ' + secs + 's' : mins + 'm';
+                } else {
+                    const hours = Math.floor(seconds / 3600);
+                    const mins = Math.floor((seconds % 3600) / 60);
+                    return mins > 0 ? hours + 'h ' + mins + 'm' : hours + 'h';
+                }
             }
 
             getStyleColors() {
@@ -1988,9 +2121,9 @@
             }
 
             updateInfo() {
-                document.getElementById('frameCount').textContent = this.frames.length || 30;
-                document.getElementById('animDuration').textContent = this.duration + 's';
-                document.getElementById('animFPS').textContent = 12;
+                document.getElementById('frameCount').textContent = this.frames.length || Math.max(30, this.duration * 12);
+                document.getElementById('animDuration').textContent = this.formatDuration(this.duration);
+                document.getElementById('animFPS').textContent = this.fps || 12;
             }
 
             async exportAs(format) {
@@ -2013,38 +2146,47 @@
 
             async exportAsVideo() {
                 // Create video from frames using MediaRecorder API
-                const stream = this.canvas.captureStream(30);
-                const mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm' });
+                const fps = this.fps || 12;
+                const stream = this.canvas.captureStream(fps);
+                const mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm', videoBitsPerSecond: 2500000 });
                 const chunks = [];
 
-                mediaRecorder.ondataavailable = (e) => chunks.push(e.data);
+                mediaRecorder.ondataavailable = (e) => {
+                    if (e.data.size > 0) chunks.push(e.data);
+                };
+                
                 mediaRecorder.onstop = () => {
                     const blob = new Blob(chunks, { type: 'video/webm' });
                     const url = URL.createObjectURL(blob);
                     const a = document.createElement('a');
                     a.href = url;
-                    a.download = 'animation.webm';
+                    a.download = `animation_${this.formatDuration(this.duration).replace(' ', '')}.webm`;
                     a.click();
                     URL.revokeObjectURL(url);
                 };
 
                 // Record for the specified duration
-                mediaRecorder.start();
+                mediaRecorder.start(100);
                 const originalIndex = this.frameIndex;
                 const recordDuration = this.duration * 1000;
-                const frameTime = 1000 / 30;
+                const frameTime = 1000 / fps;
+                const totalFrames = this.frames.length;
+                let framesRecorded = 0;
+                const maxFramesToRecord = Math.min(totalFrames, this.duration * fps);
 
                 const recordInterval = setInterval(() => {
                     this.drawFrame(this.frameIndex);
-                    this.frameIndex = (this.frameIndex + 1) % this.frames.length;
+                    this.frameIndex = (this.frameIndex + 1) % totalFrames;
+                    framesRecorded++;
+                    
+                    // Stop when we've recorded enough frames for the duration
+                    if (framesRecorded >= maxFramesToRecord) {
+                        clearInterval(recordInterval);
+                        mediaRecorder.stop();
+                        this.frameIndex = originalIndex;
+                        this.drawFrame(this.frameIndex);
+                    }
                 }, frameTime);
-
-                setTimeout(() => {
-                    clearInterval(recordInterval);
-                    mediaRecorder.stop();
-                    this.frameIndex = originalIndex;
-                    this.drawFrame(this.frameIndex);
-                }, recordDuration);
             }
 
             createBackgroundElements() {
