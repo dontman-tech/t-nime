@@ -1,0 +1,2086 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AniJam Free - Free Anime Animation Maker</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700;900&family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #12121a;
+            --bg-card: rgba(255, 255, 255, 0.03);
+            --bg-card-hover: rgba(255, 255, 255, 0.06);
+            --accent-sakura: #FF6B9D;
+            --accent-cyan: #00D4FF;
+            --accent-purple: #A855F7;
+            --accent-gold: #FFD700;
+            --text-primary: #FFFFFF;
+            --text-secondary: rgba(255, 255, 255, 0.6);
+            --text-muted: rgba(255, 255, 255, 0.4);
+            --border-subtle: rgba(255, 255, 255, 0.08);
+            --glow-sakura: 0 0 60px rgba(255, 107, 157, 0.4);
+            --glow-cyan: 0 0 60px rgba(0, 212, 255, 0.4);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Animated Background */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .bg-gradient {
+            position: absolute;
+            width: 150%;
+            height: 150%;
+            top: -25%;
+            left: -25%;
+            background: 
+                radial-gradient(ellipse at 20% 20%, rgba(255, 107, 157, 0.15) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 80%, rgba(0, 212, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 50%, rgba(168, 85, 247, 0.08) 0%, transparent 60%);
+            animation: bgFloat 20s ease-in-out infinite;
+        }
+
+        @keyframes bgFloat {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            33% { transform: translate(2%, 2%) rotate(1deg); }
+            66% { transform: translate(-2%, 1%) rotate(-1deg); }
+        }
+
+        .floating-particle {
+            position: absolute;
+            border-radius: 50%;
+            pointer-events: none;
+            opacity: 0.6;
+        }
+
+        /* Sakura Petal Animation */
+        .petal {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: linear-gradient(135deg, rgba(255, 182, 193, 0.9), rgba(255, 192, 203, 0.6));
+            border-radius: 50% 0 50% 50%;
+            animation: petalFall linear infinite;
+            box-shadow: 0 0 10px rgba(255, 182, 193, 0.5);
+        }
+
+        @keyframes petalFall {
+            0% {
+                transform: translateY(-100px) rotate(0deg) translateX(0);
+                opacity: 0;
+            }
+            10% { opacity: 0.8; }
+            90% { opacity: 0.8; }
+            100% {
+                transform: translateY(100vh) rotate(720deg) translateX(100px);
+                opacity: 0;
+            }
+        }
+
+        /* Star Animation */
+        .star {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 3s ease-in-out infinite;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.2; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.5); }
+        }
+
+        /* Header */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            padding: 1rem 2rem;
+            backdrop-filter: blur(20px);
+            background: rgba(10, 10, 15, 0.8);
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            text-decoration: none;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--accent-sakura), var(--accent-cyan));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            box-shadow: var(--glow-sakura);
+            animation: logoPulse 3s ease-in-out infinite;
+        }
+
+        @keyframes logoPulse {
+            0%, 100% { box-shadow: var(--glow-sakura); }
+            50% { box-shadow: 0 0 80px rgba(255, 107, 157, 0.6); }
+        }
+
+        .logo-text {
+            font-family: 'Zen Kaku Gothic New', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 900;
+            background: linear-gradient(90deg, var(--accent-sakura), var(--accent-cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .logo-badge {
+            font-size: 0.65rem;
+            font-weight: 500;
+            padding: 0.2rem 0.5rem;
+            background: rgba(255, 107, 157, 0.2);
+            color: var(--accent-sakura);
+            border-radius: 20px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        nav {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        nav a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: color 0.3s ease;
+            position: relative;
+        }
+
+        nav a:hover {
+            color: var(--text-primary);
+        }
+
+        nav a::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--accent-sakura), var(--accent-cyan));
+            transition: width 0.3s ease;
+        }
+
+        nav a:hover::after {
+            width: 100%;
+        }
+
+        .btn-primary {
+            padding: 0.75rem 1.5rem;
+            background: linear-gradient(135deg, var(--accent-sakura), var(--accent-purple));
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(255, 107, 157, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(255, 107, 157, 0.5);
+        }
+
+        /* Main Content */
+        main {
+            position: relative;
+            z-index: 1;
+            padding: 8rem 2rem 4rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Hero Section */
+        .hero {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: rgba(0, 212, 255, 0.1);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 30px;
+            font-size: 0.8rem;
+            color: var(--accent-cyan);
+            margin-bottom: 1.5rem;
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        .hero-badge svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .hero h1 {
+            font-family: 'Zen Kaku Gothic New', sans-serif;
+            font-size: clamp(2.5rem, 6vw, 4.5rem);
+            font-weight: 900;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+            animation: fadeInUp 0.8s ease-out 0.1s backwards;
+        }
+
+        .hero h1 .gradient-text {
+            background: linear-gradient(90deg, var(--accent-sakura), var(--accent-purple), var(--accent-cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            background-size: 200% 200%;
+            animation: gradientShift 5s ease infinite;
+        }
+
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto 2rem;
+            animation: fadeInUp 0.8s ease-out 0.2s backwards;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Creator Section */
+        .creator-section {
+            display: grid;
+            grid-template-columns: 1fr 1.5fr;
+            gap: 3rem;
+            margin-bottom: 4rem;
+            animation: fadeInUp 0.8s ease-out 0.3s backwards;
+        }
+
+        @media (max-width: 1024px) {
+            .creator-section {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Input Panel */
+        .input-panel {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 24px;
+            padding: 2rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .panel-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .panel-icon {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, var(--accent-sakura), var(--accent-purple));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+        }
+
+        .panel-title {
+            font-family: 'Zen Kaku Gothic New', sans-serif;
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+
+        /* Tab Navigation */
+        .tab-nav {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 0.35rem;
+            border-radius: 12px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 0.75rem 1rem;
+            background: transparent;
+            border: none;
+            border-radius: 10px;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .tab-btn:hover {
+            color: var(--text-primary);
+        }
+
+        .tab-btn.active {
+            background: var(--bg-card);
+            color: var(--text-primary);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .tab-btn svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        /* Tab Content */
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* Input Fields */
+        .input-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .input-label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .text-input {
+            width: 100%;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-subtle);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            font-family: inherit;
+            resize: vertical;
+            min-height: 120px;
+            transition: all 0.3s ease;
+        }
+
+        .text-input:focus {
+            outline: none;
+            border-color: var(--accent-sakura);
+            box-shadow: 0 0 0 3px rgba(255, 107, 157, 0.1);
+        }
+
+        .text-input::placeholder {
+            color: var(--text-muted);
+        }
+
+        /* File Upload */
+        .file-upload {
+            position: relative;
+            border: 2px dashed var(--border-subtle);
+            border-radius: 16px;
+            padding: 3rem 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+
+        .file-upload:hover {
+            border-color: var(--accent-sakura);
+            background: rgba(255, 107, 157, 0.05);
+        }
+
+        .file-upload input {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .file-upload-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .file-upload-text {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .file-upload-text span {
+            color: var(--accent-sakura);
+            font-weight: 500;
+        }
+
+        .preview-container {
+            position: relative;
+            margin-top: 1rem;
+            border-radius: 12px;
+            overflow: hidden;
+            display: none;
+        }
+
+        .preview-container.show {
+            display: block;
+        }
+
+        .preview-image {
+            width: 100%;
+            max-height: 200px;
+            object-fit: contain;
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        .remove-preview {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            width: 32px;
+            height: 32px;
+            background: rgba(0, 0, 0, 0.7);
+            border: none;
+            border-radius: 50%;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .remove-preview:hover {
+            background: var(--accent-sakura);
+        }
+
+        /* Style Selection */
+        .style-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+
+        .style-card {
+            position: relative;
+            padding: 1.25rem;
+            background: rgba(255, 255, 255, 0.03);
+            border: 2px solid var(--border-subtle);
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+
+        .style-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent-sakura), var(--accent-cyan));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .style-card:hover {
+            border-color: rgba(255, 107, 157, 0.3);
+            background: rgba(255, 107, 157, 0.05);
+            transform: translateY(-2px);
+        }
+
+        .style-card.selected {
+            border-color: var(--accent-sakura);
+            background: rgba(255, 107, 157, 0.1);
+        }
+
+        .style-card.selected::before {
+            opacity: 1;
+        }
+
+        .style-icon {
+            font-size: 2rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .style-name {
+            font-weight: 600;
+            font-size: 0.95rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .style-desc {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        /* Animation Settings */
+        .settings-row {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .setting-item {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-subtle);
+            border-radius: 12px;
+            padding: 1rem;
+        }
+
+        .setting-label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .setting-value {
+            font-weight: 600;
+            color: var(--accent-cyan);
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 6px;
+            -webkit-appearance: none;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            outline: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            background: linear-gradient(135deg, var(--accent-sakura), var(--accent-purple));
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(255, 107, 157, 0.5);
+            transition: transform 0.2s ease;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+
+        /* Generate Button */
+        .generate-btn {
+            width: 100%;
+            padding: 1.25rem;
+            background: linear-gradient(135deg, var(--accent-sakura), var(--accent-purple));
+            border: none;
+            border-radius: 16px;
+            color: white;
+            font-family: 'Zen Kaku Gothic New', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            box-shadow: 0 4px 30px rgba(255, 107, 157, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .generate-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .generate-btn:hover::before {
+            left: 100%;
+        }
+
+        .generate-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 40px rgba(255, 107, 157, 0.6);
+        }
+
+        .generate-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .generate-btn svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        /* Preview Panel */
+        .preview-panel {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 24px;
+            padding: 2rem;
+            backdrop-filter: blur(10px);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .preview-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .preview-title {
+            font-family: 'Zen Kaku Gothic New', sans-serif;
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+
+        .preview-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .preview-action-btn {
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-subtle);
+            border-radius: 10px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .preview-action-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-primary);
+        }
+
+        .preview-action-btn svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        /* Canvas Container */
+        .canvas-container {
+            position: relative;
+            aspect-ratio: 16/9;
+            background: #000;
+            border-radius: 16px;
+            overflow: hidden;
+            margin-bottom: 1.5rem;
+        }
+
+        #animationCanvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .canvas-placeholder {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+        }
+
+        .canvas-placeholder-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .canvas-placeholder-text {
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .canvas-placeholder-hint {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            opacity: 0.7;
+        }
+
+        /* Animation Info */
+        .animation-info {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+        }
+
+        .info-item {
+            text-align: center;
+        }
+
+        .info-value {
+            font-family: 'Zen Kaku Gothic New', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--accent-cyan);
+        }
+
+        .info-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* Export Buttons */
+        .export-actions {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+
+        .export-btn {
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-subtle);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .export-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: var(--accent-cyan);
+        }
+
+        .export-btn svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        /* Features Section */
+        .features-section {
+            margin-bottom: 4rem;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .section-badge {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            background: rgba(168, 85, 247, 0.1);
+            border: 1px solid rgba(168, 85, 247, 0.3);
+            border-radius: 30px;
+            font-size: 0.8rem;
+            color: var(--accent-purple);
+            margin-bottom: 1rem;
+        }
+
+        .section-title {
+            font-family: 'Zen Kaku Gothic New', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 900;
+            margin-bottom: 1rem;
+        }
+
+        .section-desc {
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .feature-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 20px;
+            padding: 2rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--accent-sakura), var(--accent-cyan));
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.3s ease;
+        }
+
+        .feature-card:hover {
+            background: var(--bg-card-hover);
+            transform: translateY(-5px);
+            border-color: rgba(255, 107, 157, 0.2);
+        }
+
+        .feature-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .feature-icon {
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(135deg, var(--accent-sakura), var(--accent-purple));
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .feature-title {
+            font-family: 'Zen Kaku Gothic New', sans-serif;
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+        }
+
+        .feature-desc {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        /* Templates Section */
+        .templates-section {
+            margin-bottom: 4rem;
+        }
+
+        .templates-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .template-card {
+            position: relative;
+            aspect-ratio: 16/10;
+            border-radius: 16px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .template-card:hover {
+            transform: scale(1.02);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        .template-bg {
+            position: absolute;
+            inset: 0;
+            background-size: cover;
+            background-position: center;
+            transition: transform 0.3s ease;
+        }
+
+        .template-card:hover .template-bg {
+            transform: scale(1.1);
+        }
+
+        .template-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.9), transparent);
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding: 1.5rem;
+        }
+
+        .template-title {
+            font-family: 'Zen Kaku Gothic New', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+
+        .template-style {
+            font-size: 0.8rem;
+            color: var(--accent-sakura);
+        }
+
+        .template-play {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 60px;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .template-card:hover .template-play {
+            opacity: 1;
+        }
+
+        .template-play svg {
+            width: 24px;
+            height: 24px;
+            fill: white;
+        }
+
+        /* Footer */
+        footer {
+            position: relative;
+            z-index: 1;
+            padding: 3rem 2rem;
+            border-top: 1px solid var(--border-subtle);
+            text-align: center;
+        }
+
+        .footer-content {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .footer-logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .footer-text {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-top: 1.5rem;
+        }
+
+        .footer-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: color 0.3s ease;
+        }
+
+        .footer-links a:hover {
+            color: var(--accent-sakura);
+        }
+
+        /* Loading Animation */
+        .loading-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(10, 10, 15, 0.95);
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+
+        .loading-overlay.show {
+            display: flex;
+        }
+
+        .loading-spinner {
+            width: 80px;
+            height: 80px;
+            border: 3px solid var(--border-subtle);
+            border-top-color: var(--accent-sakura);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 1.5rem;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            font-family: 'Zen Kaku Gothic New', sans-serif;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .loading-hint {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            header {
+                padding: 1rem;
+            }
+
+            nav {
+                display: none;
+            }
+
+            main {
+                padding: 6rem 1rem 2rem;
+            }
+
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .settings-row,
+            .style-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .export-actions {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-subtle);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <!-- Animated Background -->
+    <div class="bg-animation">
+        <div class="bg-gradient"></div>
+    </div>
+
+    <!-- Header -->
+    <header>
+        <div class="header-content">
+            <a href="#" class="logo">
+                <div class="logo-icon">&#x1F3AC;</div>
+                <span class="logo-text">AniJam</span>
+                <span class="logo-badge">Free</span>
+            </a>
+            <nav>
+                <a href="#create">Create</a>
+                <a href="#templates">Templates</a>
+                <a href="#features">Features</a>
+                <a href="#">Community</a>
+            </nav>
+            <button class="btn-primary">Start Creating</button>
+        </div>
+    </header>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">Creating your animation...</div>
+        <div class="loading-hint">This may take a few moments</div>
+    </div>
+
+    <!-- Main Content -->
+    <main>
+        <!-- Hero Section -->
+        <section class="hero">
+            <div class="hero-badge">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+                </svg>
+                100% Free Forever
+            </div>
+            <h1>Create <span class="gradient-text">Anime Animations</span><br>Like a Pro</h1>
+            <p>Transform your ideas into stunning anime animations with AI-powered tools. No subscriptions, no hidden fees — just pure creative freedom.</p>
+        </section>
+
+        <!-- Creator Section -->
+        <section class="creator-section" id="create">
+            <!-- Input Panel -->
+            <div class="input-panel">
+                <div class="panel-header">
+                    <div class="panel-icon">&#x2728;</div>
+                    <h2 class="panel-title">Create Animation</h2>
+                </div>
+
+                <!-- Tabs -->
+                <div class="tab-nav">
+                    <button class="tab-btn active" data-tab="text">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 19l7-7 3 3-7 7-3-3z"/>
+                            <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/>
+                        </svg>
+                        Text
+                    </button>
+                    <button class="tab-btn" data-tab="image">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                            <circle cx="8.5" cy="8.5" r="1.5"/>
+                            <polyline points="21 15 16 10 5 21"/>
+                        </svg>
+                        Image
+                    </button>
+                </div>
+
+                <!-- Text Tab -->
+                <div class="tab-content active" id="text-tab">
+                    <div class="input-group">
+                        <label class="input-label">Describe your animation</label>
+                        <textarea class="text-input" id="promptInput" placeholder="A samurai standing in a cherry blossom garden, with petals flying in the wind..."></textarea>
+                    </div>
+                </div>
+
+                <!-- Image Tab -->
+                <div class="tab-content" id="image-tab">
+                    <div class="file-upload" id="imageUpload">
+                        <input type="file" accept="image/*" id="imageInput">
+                        <div class="file-upload-icon">&#x1F3A8;</div>
+                        <div class="file-upload-text">
+                            Drop your image here or <span>browse</span><br>
+                            PNG, JPG, GIF up to 10MB
+                        </div>
+                    </div>
+                    <div class="preview-container" id="imagePreview">
+                        <img class="preview-image" id="previewImg" src="" alt="Preview">
+                        <button class="remove-preview" id="removeImage">&#x2715;</button>
+                    </div>
+                    <div class="input-group" style="margin-top: 1rem;">
+                        <label class="input-label">Animation description (optional)</label>
+                        <textarea class="text-input" id="imagePrompt" placeholder="Describe how you want this image animated..." style="min-height: 80px;"></textarea>
+                    </div>
+                </div>
+
+                <!-- Style Selection -->
+                <div class="input-group">
+                    <label class="input-label">Choose your style</label>
+                    <div class="style-grid">
+                        <div class="style-card selected" data-style="anime">
+                            <div class="style-icon">&#x1F338;</div>
+                            <div class="style-name">Anime</div>
+                            <div class="style-desc">Classic Japanese animation</div>
+                        </div>
+                        <div class="style-card" data-style="ghibli">
+                            <div class="style-icon">&#x1F3D4;</div>
+                            <div class="style-name">Ghibli</div>
+                            <div class="style-desc">Soft, hand-painted aesthetic</div>
+                        </div>
+                        <div class="style-card" data-style="minecraft">
+                            <div class="style-icon">&#x26CF;&#xFE0F;</div>
+                            <div class="style-name">Pixel Art</div>
+                            <div class="style-desc">Retro block-style animation</div>
+                        </div>
+                        <div class="style-card" data-style="cartoon">
+                            <div class="style-icon">&#x1F3AD;</div>
+                            <div class="style-name">Cartoon</div>
+                            <div class="style-desc">Fun 2D flat animation</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Animation Settings -->
+                <div class="settings-row">
+                    <div class="setting-item">
+                        <div class="setting-label">
+                            <span>Duration</span>
+                            <span class="setting-value" id="durationValue">5s</span>
+                        </div>
+                        <input type="range" id="durationSlider" min="2" max="15" value="5">
+                    </div>
+                    <div class="setting-item">
+                        <div class="setting-label">
+                            <span>Intensity</span>
+                            <span class="setting-value" id="intensityValue">50%</span>
+                        </div>
+                        <input type="range" id="intensitySlider" min="10" max="100" value="50">
+                    </div>
+                </div>
+
+                <button class="generate-btn" id="generateBtn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+                    </svg>
+                    Generate Animation
+                </button>
+            </div>
+
+            <!-- Preview Panel -->
+            <div class="preview-panel">
+                <div class="preview-header">
+                    <h3 class="preview-title">Preview</h3>
+                    <div class="preview-actions">
+                        <button class="preview-action-btn" id="playBtn" title="Play">
+                            <svg viewBox="0 0 24 24" fill="currentColor">
+                                <polygon points="5 3 19 12 5 21 5 3"/>
+                            </svg>
+                        </button>
+                        <button class="preview-action-btn" id="pauseBtn" title="Pause" style="display: none;">
+                            <svg viewBox="0 0 24 24" fill="currentColor">
+                                <rect x="6" y="4" width="4" height="16"/>
+                                <rect x="14" y="4" width="4" height="16"/>
+                            </svg>
+                        </button>
+                        <button class="preview-action-btn" id="downloadBtn" title="Download">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                <polyline points="7 10 12 15 17 10"/>
+                                <line x1="12" y1="15" x2="12" y2="3"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="canvas-container">
+                    <canvas id="animationCanvas"></canvas>
+                    <div class="canvas-placeholder" id="canvasPlaceholder">
+                        <div class="canvas-placeholder-icon">&#x1F3AC;</div>
+                        <div class="canvas-placeholder-text">Your animation will appear here</div>
+                        <div class="canvas-placeholder-hint">Enter a prompt and click Generate</div>
+                    </div>
+                </div>
+
+                <div class="animation-info">
+                    <div class="info-item">
+                        <div class="info-value" id="frameCount">0</div>
+                        <div class="info-label">Frames</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-value" id="animDuration">0s</div>
+                        <div class="info-label">Duration</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-value" id="animFPS">0</div>
+                        <div class="info-label">FPS</div>
+                    </div>
+                </div>
+
+                <div class="export-actions">
+                    <button class="export-btn" id="exportGif">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"/>
+                            <line x1="7" y1="2" x2="7" y2="22"/>
+                            <line x1="17" y1="2" x2="17" y2="22"/>
+                            <line x1="2" y1="12" x2="22" y2="12"/>
+                            <line x1="2" y1="7" x2="7" y2="7"/>
+                            <line x1="2" y1="17" x2="7" y2="17"/>
+                            <line x1="17" y1="17" x2="22" y2="17"/>
+                            <line x1="17" y1="7" x2="22" y2="7"/>
+                        </svg>
+                        Export as GIF
+                    </button>
+                    <button class="export-btn" id="exportVideo">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polygon points="23 7 16 12 23 17 23 7"/>
+                            <rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
+                        </svg>
+                        Export as Video
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Features Section -->
+        <section class="features-section" id="features">
+            <div class="section-header">
+                <div class="section-badge">Features</div>
+                <h2 class="section-title">Powerful Tools, Zero Cost</h2>
+                <p class="section-desc">Everything you need to create stunning anime animations, completely free.</p>
+            </div>
+
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">&#x1F4DD;</div>
+                    <h3 class="feature-title">Text to Animation</h3>
+                    <p class="feature-desc">Transform your written ideas into captivating anime animations. Just describe your vision and watch it come to life.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">&#x1F5BC;</div>
+                    <h3 class="feature-title">Image Animation</h3>
+                    <p class="feature-desc">Bring static images to life with smooth, fluid animations. Perfect for portraits, landscapes, and artwork.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">&#x1F3A8;</div>
+                    <h3 class="feature-title">Multiple Styles</h3>
+                    <p class="feature-desc">Choose from Anime, Ghibli, Pixel Art, and Cartoon styles. Each style brings its own unique aesthetic.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">&#x26A1;</div>
+                    <h3 class="feature-title">Real-time Preview</h3>
+                    <p class="feature-desc">See your animations come to life instantly with our real-time preview system. Tweak and adjust on the fly.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">&#x1F4E4;</div>
+                    <h3 class="feature-title">Easy Export</h3>
+                    <p class="feature-desc">Download your creations as high-quality GIFs or videos. Share directly to social media or use in your projects.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">&#x1F310;</div>
+                    <h3 class="feature-title">No Watermark</h3>
+                    <p class="feature-desc">Your creations are 100% yours. No watermarks, no branding, no restrictions on how you use them.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Templates Section -->
+        <section class="templates-section" id="templates">
+            <div class="section-header">
+                <div class="section-badge">Inspiration</div>
+                <h2 class="section-title">Start with Templates</h2>
+                <p class="section-desc">Get inspired by these pre-made animation templates and customize them to your liking.</p>
+            </div>
+
+            <div class="templates-grid">
+                <div class="template-card" data-template="samurai">
+                    <div class="template-bg" style="background: linear-gradient(135deg, #ff6b6b, #4ecdc4);"></div>
+                    <div class="template-overlay">
+                        <h3 class="template-title">Samurai Warrior</h3>
+                        <span class="template-style">Anime Style</span>
+                    </div>
+                    <div class="template-play">
+                        <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                    </div>
+                </div>
+                <div class="template-card" data-template="forest">
+                    <div class="template-bg" style="background: linear-gradient(135deg, #2ecc71, #27ae60);"></div>
+                    <div class="template-overlay">
+                        <h3 class="template-title">Enchanted Forest</h3>
+                        <span class="template-style">Ghibli Style</span>
+                    </div>
+                    <div class="template-play">
+                        <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                    </div>
+                </div>
+                <div class="template-card" data-template="cyber">
+                    <div class="template-bg" style="background: linear-gradient(135deg, #667eea, #764ba2);"></div>
+                    <div class="template-overlay">
+                        <h3 class="template-title">Cyber City</h3>
+                        <span class="template-style">Anime Style</span>
+                    </div>
+                    <div class="template-play">
+                        <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                    </div>
+                </div>
+                <div class="template-card" data-template="space">
+                    <div class="template-bg" style="background: linear-gradient(135deg, #0c0c0c, #1a1a2e);"></div>
+                    <div class="template-overlay">
+                        <h3 class="template-title">Space Adventure</h3>
+                        <span class="template-style">Cartoon Style</span>
+                    </div>
+                    <div class="template-play">
+                        <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-logo">
+                <div class="logo-icon">&#x1F3AC;</div>
+                <span class="logo-text">AniJam Free</span>
+            </div>
+            <p class="footer-text">Free anime animation maker for everyone. No signup required.</p>
+            <div class="footer-links">
+                <a href="#">Privacy Policy</a>
+                <a href="#">Terms of Service</a>
+                <a href="#">Contact</a>
+                <a href="#">GitHub</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // ============================================
+        // AniJam Free - Anime Animation Maker
+        // ============================================
+
+        class AnimeMaker {
+            constructor() {
+                this.canvas = document.getElementById('animationCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.currentStyle = 'anime';
+                this.currentTab = 'text';
+                this.isPlaying = false;
+                this.animationId = null;
+                this.frames = [];
+                this.frameIndex = 0;
+                this.uploadedImage = null;
+                this.duration = 5;
+                this.intensity = 50;
+
+                this.init();
+            }
+
+            init() {
+                this.setupCanvas();
+                this.setupEventListeners();
+                this.createBackgroundElements();
+                this.updateInfo();
+            }
+
+            setupCanvas() {
+                const container = this.canvas.parentElement;
+                const rect = container.getBoundingClientRect();
+                this.canvas.width = rect.width * 2;
+                this.canvas.height = rect.height * 2;
+                this.ctx.scale(2, 2);
+                this.drawInitialState();
+            }
+
+            setupEventListeners() {
+                // Tab switching
+                document.querySelectorAll('.tab-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => this.switchTab(e.target.closest('.tab-btn').dataset.tab));
+                });
+
+                // Style selection
+                document.querySelectorAll('.style-card').forEach(card => {
+                    card.addEventListener('click', () => this.selectStyle(card.dataset.style));
+                });
+
+                // Sliders
+                document.getElementById('durationSlider').addEventListener('input', (e) => {
+                    this.duration = parseInt(e.target.value);
+                    document.getElementById('durationValue').textContent = this.duration + 's';
+                    this.updateInfo();
+                });
+
+                document.getElementById('intensitySlider').addEventListener('input', (e) => {
+                    this.intensity = parseInt(e.target.value);
+                    document.getElementById('intensityValue').textContent = this.intensity + '%';
+                });
+
+                // Generate button
+                document.getElementById('generateBtn').addEventListener('click', () => this.generateAnimation());
+
+                // Playback controls
+                document.getElementById('playBtn').addEventListener('click', () => this.play());
+                document.getElementById('pauseBtn').addEventListener('click', () => this.pause());
+
+                // Export buttons
+                document.getElementById('exportGif').addEventListener('click', () => this.exportAs('gif'));
+                document.getElementById('exportVideo').addEventListener('click', () => this.exportAs('video'));
+
+                // Image upload
+                const imageInput = document.getElementById('imageInput');
+                imageInput.addEventListener('change', (e) => this.handleImageUpload(e));
+
+                document.getElementById('removeImage').addEventListener('click', () => this.removeImage());
+
+                // Template cards
+                document.querySelectorAll('.template-card').forEach(card => {
+                    card.addEventListener('click', () => this.useTemplate(card.dataset.template));
+                });
+
+                // Window resize
+                window.addEventListener('resize', () => {
+                    this.setupCanvas();
+                    if (this.frames.length > 0) {
+                        this.drawFrame(this.frameIndex);
+                    }
+                });
+            }
+
+            switchTab(tab) {
+                this.currentTab = tab;
+                document.querySelectorAll('.tab-btn').forEach(btn => {
+                    btn.classList.toggle('active', btn.dataset.tab === tab);
+                });
+                document.querySelectorAll('.tab-content').forEach(content => {
+                    content.classList.toggle('active', content.id === tab + '-tab');
+                });
+            }
+
+            selectStyle(style) {
+                this.currentStyle = style;
+                document.querySelectorAll('.style-card').forEach(card => {
+                    card.classList.toggle('selected', card.dataset.style === style);
+                });
+            }
+
+            handleImageUpload(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                        this.uploadedImage = new Image();
+                        this.uploadedImage.src = event.target.result;
+                        document.getElementById('previewImg').src = event.target.result;
+                        document.getElementById('imagePreview').classList.add('show');
+                    };
+                    reader.readAsDataURL(file);
+                }
+            }
+
+            removeImage() {
+                this.uploadedImage = null;
+                document.getElementById('imageInput').value = '';
+                document.getElementById('imagePreview').classList.remove('show');
+            }
+
+            useTemplate(template) {
+                const prompts = {
+                    samurai: 'A brave samurai standing in a misty Japanese garden, cherry blossoms floating in the air, dramatic lighting',
+                    forest: 'A magical forest with glowing mushrooms and fireflies, a small spirit creature leading the way through ancient trees',
+                    cyber: 'A futuristic neon city at night, flying vehicles passing between skyscrapers, holographic advertisements',
+                    space: 'An astronaut floating through a colorful nebula, distant galaxies and stars twinkling around'
+                };
+
+                document.getElementById('promptInput').value = prompts[template] || '';
+                this.switchTab('text');
+                document.querySelector('.input-panel').scrollIntoView({ behavior: 'smooth' });
+            }
+
+            async generateAnimation() {
+                const loading = document.getElementById('loadingOverlay');
+                loading.classList.add('show');
+
+                // Simulate generation delay
+                await new Promise(resolve => setTimeout(resolve, 2000));
+
+                this.frames = [];
+                const frameCount = 30;
+                const prompt = document.getElementById('promptInput').value || document.getElementById('imagePrompt').value || 'Abstract anime animation';
+
+                // Generate frames
+                for (let i = 0; i < frameCount; i++) {
+                    this.frames.push(this.generateFrame(i, frameCount, prompt));
+                }
+
+                this.frameIndex = 0;
+                this.updateInfo();
+                this.hidePlaceholder();
+                this.play();
+
+                loading.classList.remove('show');
+            }
+
+            generateFrame(index, total, prompt) {
+                const progress = index / total;
+                const time = index * 0.1;
+
+                return {
+                    progress,
+                    time,
+                    prompt,
+                    rotation: Math.sin(time) * 5 * (this.intensity / 50),
+                    scale: 1 + Math.sin(time * 2) * 0.02 * (this.intensity / 50),
+                    offsetX: Math.sin(time) * 10 * (this.intensity / 50),
+                    offsetY: Math.cos(time) * 5 * (this.intensity / 50),
+                    particleCount: Math.floor(20 + this.intensity / 5),
+                    glowIntensity: 0.3 + Math.sin(time) * 0.2,
+                    colors: this.getStyleColors()
+                };
+            }
+
+            getStyleColors() {
+                const styles = {
+                    anime: { primary: '#FF6B9D', secondary: '#00D4FF', accent: '#A855F7', bg: '#1a1a2e' },
+                    ghibli: { primary: '#4ECDC4', secondary: '#FFE66D', accent: '#FF6B6B', bg: '#2d4a3e' },
+                    minecraft: { primary: '#4ADE80', secondary: '#60A5FA', accent: '#FBBF24', bg: '#1e293b' },
+                    cartoon: { primary: '#F472B6', secondary: '#34D399', accent: '#FB923C', bg: '#3b2d4a' }
+                };
+                return styles[this.currentStyle] || styles.anime;
+            }
+
+            drawFrame(frameIndex) {
+                if (this.frames.length === 0) return;
+
+                const frame = this.frames[frameIndex];
+                const width = this.canvas.width / 2;
+                const height = this.canvas.height / 2;
+
+                // Clear canvas
+                this.ctx.fillStyle = frame.colors.bg;
+                this.ctx.fillRect(0, 0, width, height);
+
+                // Draw animated background
+                this.drawAnimatedBackground(frame, width, height);
+
+                // Draw particles
+                this.drawParticles(frame, width, height);
+
+                // Draw main subject
+                this.drawSubject(frame, width, height);
+
+                // Draw glow effects
+                this.drawGlow(frame, width, height);
+
+                // Draw prompt text
+                this.drawPromptText(frame, width, height);
+            }
+
+            drawAnimatedBackground(frame, width, height) {
+                // Gradient background with animation
+                const gradient = this.ctx.createRadialGradient(
+                    width / 2 + Math.sin(frame.time) * 50,
+                    height / 2 + Math.cos(frame.time) * 30,
+                    0,
+                    width / 2,
+                    height / 2,
+                    width
+                );
+                gradient.addColorStop(0, frame.colors.primary + '40');
+                gradient.addColorStop(0.5, frame.colors.secondary + '20');
+                gradient.addColorStop(1, frame.colors.bg);
+
+                this.ctx.fillStyle = gradient;
+                this.ctx.fillRect(0, 0, width, height);
+
+                // Animated grid lines
+                this.ctx.strokeStyle = frame.colors.accent + '10';
+                this.ctx.lineWidth = 1;
+                const gridSize = 40;
+                const offset = (frame.time * 20) % gridSize;
+
+                for (let x = -gridSize + offset; x < width + gridSize; x += gridSize) {
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(x, 0);
+                    this.ctx.lineTo(x, height);
+                    this.ctx.stroke();
+                }
+
+                for (let y = -gridSize + offset; y < height + gridSize; y += gridSize) {
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(0, y);
+                    this.ctx.lineTo(width, y);
+                    this.ctx.stroke();
+                }
+            }
+
+            drawParticles(frame, width, height) {
+                const particles = [];
+                for (let i = 0; i < frame.particleCount; i++) {
+                    const angle = (i / frame.particleCount) * Math.PI * 2 + frame.time;
+                    const radius = 50 + Math.sin(frame.time + i) * 30 + i * 2;
+                    const x = width / 2 + Math.cos(angle) * radius + frame.offsetX;
+                    const y = height / 2 + Math.sin(angle) * radius * 0.6 + frame.offsetY;
+                    const size = 2 + Math.sin(frame.time * 2 + i) * 2;
+                    const alpha = 0.3 + Math.sin(frame.time * 3 + i) * 0.3;
+
+                    particles.push({ x, y, size, alpha });
+                }
+
+                particles.forEach((p, i) => {
+                    const color = i % 3 === 0 ? frame.colors.primary :
+                                  i % 3 === 1 ? frame.colors.secondary : frame.colors.accent;
+
+                    this.ctx.beginPath();
+                    this.ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                    this.ctx.fillStyle = color + Math.floor(p.alpha * 255).toString(16).padStart(2, '0');
+                    this.ctx.fill();
+                });
+            }
+
+            drawSubject(frame, width, height) {
+                const centerX = width / 2 + frame.offsetX;
+                const centerY = height / 2 + frame.offsetY;
+
+                this.ctx.save();
+                this.ctx.translate(centerX, centerY);
+                this.ctx.rotate(frame.rotation * Math.PI / 180);
+                this.ctx.scale(frame.scale, frame.scale);
+
+                // Draw uploaded image if exists
+                if (this.uploadedImage) {
+                    const maxSize = Math.min(width, height) * 0.5;
+                    const imgRatio = this.uploadedImage.width / this.uploadedImage.height;
+                    let imgWidth, imgHeight;
+
+                    if (imgRatio > 1) {
+                        imgWidth = maxSize;
+                        imgHeight = maxSize / imgRatio;
+                    } else {
+                        imgHeight = maxSize;
+                        imgWidth = maxSize * imgRatio;
+                    }
+
+                    this.ctx.drawImage(
+                        this.uploadedImage,
+                        -imgWidth / 2,
+                        -imgHeight / 2,
+                        imgWidth,
+                        imgHeight
+                    );
+                } else {
+                    // Draw anime character representation
+                    this.drawAnimeCharacter(frame);
+                }
+
+                this.ctx.restore();
+            }
+
+            drawAnimeCharacter(frame) {
+                const size = 80;
+
+                // Glow
+                const glow = this.ctx.createRadialGradient(0, 0, 0, 0, 0, size * 2);
+                glow.addColorStop(0, frame.colors.primary + '60');
+                glow.addColorStop(1, 'transparent');
+                this.ctx.fillStyle = glow;
+                this.ctx.fillRect(-size * 2, -size * 2, size * 4, size * 4);
+
+                // Body
+                this.ctx.fillStyle = frame.colors.primary;
+                this.ctx.beginPath();
+                this.ctx.ellipse(0, 20, size * 0.6, size * 0.8, 0, 0, Math.PI * 2);
+                this.ctx.fill();
+
+                // Head
+                this.ctx.fillStyle = '#FFE4C4';
+                this.ctx.beginPath();
+                this.ctx.arc(0, -40, size * 0.5, 0, Math.PI * 2);
+                this.ctx.fill();
+
+                // Hair
+                this.ctx.fillStyle = frame.colors.accent;
+                this.ctx.beginPath();
+                this.ctx.ellipse(0, -50, size * 0.55, size * 0.35, 0, Math.PI, 0);
+                this.ctx.fill();
+
+                // Eyes
+                const eyeOffset = Math.sin(frame.time * 2) * 2;
+                this.ctx.fillStyle = frame.colors.primary;
+                this.ctx.beginPath();
+                this.ctx.ellipse(-15, -40, 8, 12, 0, 0, Math.PI * 2);
+                this.ctx.fill();
+                this.ctx.beginPath();
+                this.ctx.ellipse(15, -40, 8, 12, 0, 0, Math.PI * 2);
+                this.ctx.fill();
+
+                // Eye shine
+                this.ctx.fillStyle = 'white';
+                this.ctx.beginPath();
+                this.ctx.arc(-12, -43 + eyeOffset, 3, 0, Math.PI * 2);
+                this.ctx.fill();
+                this.ctx.beginPath();
+                this.ctx.arc(18, -43 + eyeOffset, 3, 0, Math.PI * 2);
+                this.ctx.fill();
+            }
+
+            drawGlow(frame, width, height) {
+                // Corner glows
+                const corners = [
+                    { x: 0, y: 0, color: frame.colors.primary },
+                    { x: width, y: 0, color: frame.colors.secondary },
+                    { x: 0, y: height, color: frame.colors.accent },
+                    { x: width, y: height, color: frame.colors.primary }
+                ];
+
+                corners.forEach((corner, i) => {
+                    const glow = this.ctx.createRadialGradient(
+                        corner.x, corner.y, 0,
+                        corner.x, corner.y, 150
+                    );
+                    glow.addColorStop(0, corner.color + '30');
+                    glow.addColorStop(1, 'transparent');
+                    this.ctx.fillStyle = glow;
+                    this.ctx.fillRect(corner.x - 150, corner.y - 150, 300, 300);
+                });
+            }
+
+            drawPromptText(frame, width, height) {
+                // Style badge
+                this.ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+                this.ctx.fillRect(20, height - 50, 120, 30);
+                this.ctx.fillStyle = frame.colors.primary;
+                this.ctx.font = 'bold 12px "Zen Kaku Gothic New", sans-serif';
+                this.ctx.fillText(this.currentStyle.toUpperCase(), 35, height - 30);
+
+                // Progress indicator
+                const progressWidth = 100;
+                const progressX = width - progressWidth - 20;
+                this.ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+                this.ctx.fillRect(progressX, height - 50, progressWidth, 30);
+
+                this.ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+                this.ctx.fillRect(progressX + 5, height - 40, (progressWidth - 10) * frame.progress, 20);
+
+                this.ctx.fillStyle = 'white';
+                this.ctx.font = '12px "Noto Sans JP", sans-serif';
+                this.ctx.fillText(Math.round(frame.progress * 100) + '%', progressX + 35, height - 28);
+            }
+
+            drawInitialState() {
+                const width = this.canvas.width / 2;
+                const height = this.canvas.height / 2;
+
+                this.ctx.fillStyle = '#0a0a0f';
+                this.ctx.fillRect(0, 0, width, height);
+
+                // Draw decorative elements
+                this.ctx.fillStyle = '#FF6B9D20';
+                this.ctx.beginPath();
+                this.ctx.arc(width * 0.3, height * 0.3, 100, 0, Math.PI * 2);
+                this.ctx.fill();
+
+                this.ctx.fillStyle = '#00D4FF10';
+                this.ctx.beginPath();
+                this.ctx.arc(width * 0.7, height * 0.7, 120, 0, Math.PI * 2);
+                this.ctx.fill();
+            }
+
+            hidePlaceholder() {
+                document.getElementById('canvasPlaceholder').style.display = 'none';
+            }
+
+            showPlaceholder() {
+                document.getElementById('canvasPlaceholder').style.display = 'flex';
+            }
+
+            play() {
+                if (this.frames.length === 0) return;
+
+                this.isPlaying = true;
+                document.getElementById('playBtn').style.display = 'none';
+                document.getElementById('pauseBtn').style.display = 'flex';
+                this.animate();
+            }
+
+            pause() {
+                this.isPlaying = false;
+                document.getElementById('playBtn').style.display = 'flex';
+                document.getElementById('pauseBtn').style.display = 'none';
+                if (this.animationId) {
+                    cancelAnimationFrame(this.animationId);
+                }
+            }
+
+            animate() {
+                if (!this.isPlaying) return;
+
+                this.drawFrame(this.frameIndex);
+                this.frameIndex = (this.frameIndex + 1) % this.frames.length;
+
+                this.animationId = requestAnimationFrame(() => this.animate());
+            }
+
+            updateInfo() {
+                document.getElementById('frameCount').textContent = this.frames.length || 30;
+                document.getElementById('animDuration').textContent = this.duration + 's';
+                document.getElementById('animFPS').textContent = 12;
+            }
+
+            async exportAs(format) {
+                if (this.frames.length === 0) {
+                    alert('Please generate an animation first!');
+                    return;
+                }
+
+                if (format === 'gif') {
+                    await this.exportAsGif();
+                } else {
+                    await this.exportAsVideo();
+                }
+            }
+
+            async exportAsGif() {
+                // Create a simple GIF-like animation (using canvas frames)
+                alert('GIF export would require a library like gif.js. For now, try taking a screenshot or use the video export!');
+            }
+
+            async exportAsVideo() {
+                // Create video from frames using MediaRecorder API
+                const stream = this.canvas.captureStream(30);
+                const mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm' });
+                const chunks = [];
+
+                mediaRecorder.ondataavailable = (e) => chunks.push(e.data);
+                mediaRecorder.onstop = () => {
+                    const blob = new Blob(chunks, { type: 'video/webm' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'animation.webm';
+                    a.click();
+                    URL.revokeObjectURL(url);
+                };
+
+                // Record for the specified duration
+                mediaRecorder.start();
+                const originalIndex = this.frameIndex;
+                const recordDuration = this.duration * 1000;
+                const frameTime = 1000 / 30;
+
+                const recordInterval = setInterval(() => {
+                    this.drawFrame(this.frameIndex);
+                    this.frameIndex = (this.frameIndex + 1) % this.frames.length;
+                }, frameTime);
+
+                setTimeout(() => {
+                    clearInterval(recordInterval);
+                    mediaRecorder.stop();
+                    this.frameIndex = originalIndex;
+                    this.drawFrame(this.frameIndex);
+                }, recordDuration);
+            }
+
+            createBackgroundElements() {
+                const bgAnimation = document.querySelector('.bg-animation');
+
+                // Create floating particles
+                for (let i = 0; i < 20; i++) {
+                    const particle = document.createElement('div');
+                    particle.className = 'floating-particle';
+                    particle.style.width = (Math.random() * 4 + 2) + 'px';
+                    particle.style.height = particle.style.width;
+                    particle.style.left = Math.random() * 100 + '%';
+                    particle.style.top = Math.random() * 100 + '%';
+                    particle.style.background = Math.random() > 0.5 ? '#FF6B9D' : '#00D4FF';
+                    particle.style.animationDelay = Math.random() * 5 + 's';
+                    particle.style.animation = 'twinkle ' + (3 + Math.random() * 2) + 's ease-in-out infinite';
+                    bgAnimation.appendChild(particle);
+                }
+
+                // Create sakura petals
+                for (let i = 0; i < 8; i++) {
+                    const petal = document.createElement('div');
+                    petal.className = 'petal';
+                    petal.style.left = Math.random() * 100 + '%';
+                    petal.style.animationDuration = (10 + Math.random() * 10) + 's';
+                    petal.style.animationDelay = Math.random() * 10 + 's';
+                    petal.style.opacity = 0.3 + Math.random() * 0.4;
+                    bgAnimation.appendChild(petal);
+                }
+            }
+        }
+
+        // Initialize the app
+        document.addEventListener('DOMContentLoaded', () => {
+            window.animeMaker = new AnimeMaker();
+        });
+    </script>
+</body>
+</html>
