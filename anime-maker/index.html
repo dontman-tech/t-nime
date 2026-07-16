@@ -1390,10 +1390,13 @@
                                 <button class="preset-btn" data-duration="30">30s</button>
                                 <button class="preset-btn" data-duration="60">1m</button>
                                 <button class="preset-btn" data-duration="180">3m</button>
+                                <button class="preset-btn" data-duration="600">10m</button>
+                                <button class="preset-btn" data-duration="1800">30m</button>
+                                <button class="preset-btn" data-duration="5400">1h30</button>
                             </div>
                             <div class="duration-input-row">
-                                <input type="range" id="durationSlider" min="1" max="600" value="5">
-                                <input type="number" id="durationInput" min="1" max="600" value="5" placeholder="Sec">
+                                <input type="range" id="durationSlider" min="1" max="5400" value="5">
+                                <input type="number" id="durationInput" min="1" max="5400" value="5" placeholder="Sec">
                             </div>
                         </div>
                     </div>
@@ -1652,7 +1655,7 @@
 
                 // Duration controls
                 const updateDuration = (value) => {
-                    this.duration = Math.max(1, Math.min(600, parseInt(value) || 5));
+                    this.duration = Math.max(1, Math.min(5400, parseInt(value) || 5));
                     document.getElementById('durationSlider').value = this.duration;
                     document.getElementById('durationInput').value = this.duration;
                     document.getElementById('durationValue').textContent = this.formatDuration(this.duration);
